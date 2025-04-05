@@ -1,0 +1,63 @@
+<.header>
+  {@scenario.title}
+  <:subtitle>{@scenario.description}</:subtitle>
+  <:actions>
+    <.link patch={~p"/scenarios/#{@scenario}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>
+        <.icon name="hero-pencil-square" class="w-5 h-5" />
+      </.button>
+    </.link>
+  </:actions>
+</.header>
+
+<div class="py-8">
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="aspect-w-16 aspect-h-9">
+        <img
+          :if={@scenario.cover}
+          src={CocArchivist.Uploaders.ImageUploader.url({@scenario.cover, @scenario}, :original)}
+          class="rounded-lg object-cover w-full h-full"
+          alt={@scenario.title}
+        />
+        <div
+          :if={!@scenario.cover}
+          class="rounded-lg bg-gray-800 w-full h-full flex items-center justify-center"
+        >
+          <span class="text-gray-400">No cover image</span>
+        </div>
+      </div>
+
+      <div class="space-y-6">
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-semibold text-gray-400 mb-1">Location</label>
+            <p class="text-gray-100">{@scenario.location}</p>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-400 mb-1">Date</label>
+            <p class="text-gray-100">{@scenario.date}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<.back navigate={~p"/scenarios"}>Back to scenarios</.back>
+
+<.modal
+  :if={@live_action == :edit}
+  id="scenario-modal"
+  show
+  on_cancel={JS.patch(~p"/scenarios/#{@scenario}")}
+>
+  <.live_component
+    module={CocArchivistWeb.ScenarioLive.FormComponent}
+    id={@scenario.id}
+    title={@page_title}
+    action={@live_action}
+    scenario={@scenario}
+    patch={~p"/scenarios/#{@scenario}"}
+  />
+</.modal>

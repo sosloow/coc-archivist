@@ -1,0 +1,44 @@
+<.header>
+  Listing Scenarios
+  <:actions>
+    <.link patch={~p"/scenarios/new"}>
+      <.button>New Scenario</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="scenarios"
+  rows={@streams.scenarios}
+  row_click={fn {_id, scenario} -> JS.navigate(~p"/scenarios/#{scenario}") end}
+>
+  <:col :let={{_id, scenario}} label="Title">{scenario.title}</:col>
+  <:col :let={{_id, scenario}} label="Description">{scenario.description}</:col>
+  <:col :let={{_id, scenario}} label="Location">{scenario.location}</:col>
+  <:col :let={{_id, scenario}} label="Date">{scenario.date}</:col>
+  <:action :let={{_id, scenario}}>
+    <div class="sr-only">
+      <.link navigate={~p"/scenarios/#{scenario}"}>Show</.link>
+    </div>
+    <.link patch={~p"/scenarios/#{scenario}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, scenario}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: scenario.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="scenario-modal" show on_cancel={JS.patch(~p"/scenarios")}>
+  <.live_component
+    module={CocArchivistWeb.ScenarioLive.FormComponent}
+    id={@scenario.id || :new}
+    title={@page_title}
+    action={@live_action}
+    scenario={@scenario}
+    patch={~p"/scenarios"}
+  />
+</.modal>

@@ -1,0 +1,35 @@
+<.flash_group flash={@flash} />
+<div class="space-y-8">
+  <div class="text-center">
+    <h1 class="text-4xl font-bold text-emerald-400">Welcome to CoC Archivist</h1>
+    <p class="mt-4 text-lg text-gray-300">Your personal Call of Cthulhu campaign manager</p>
+  </div>
+
+  <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+    <.link
+      navigate={~p"/scenarios"}
+      class="group relative rounded-lg bg-gray-800 p-6 hover:bg-gray-700 transition-colors duration-200"
+    >
+      <div class="flex items-center gap-4">
+        <.icon name="hero-document-text-solid" class="h-8 w-8 text-emerald-400" />
+        <div>
+          <h2 class="text-xl font-semibold text-gray-100">Scenarios</h2>
+          <p class="mt-1 text-gray-400">Manage your Call of Cthulhu scenarios</p>
+        </div>
+      </div>
+    </.link>
+
+    <.link
+      navigate={~p"/characters"}
+      class="group relative rounded-lg bg-gray-800 p-6 hover:bg-gray-700 transition-colors duration-200"
+    >
+      <div class="flex items-center gap-4">
+        <.icon name="hero-user-group-solid" class="h-8 w-8 text-emerald-400" />
+        <div>
+          <h2 class="text-xl font-semibold text-gray-100">Characters</h2>
+          <p class="mt-1 text-gray-400">Manage your investigators and NPCs</p>
+        </div>
+      </div>
+    </.link>
+  </div>
+</div>

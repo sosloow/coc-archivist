@@ -1,0 +1,77 @@
+<.header>
+  Characters
+  <:actions>
+    <.link patch={~p"/characters/new"}>
+      <.button>New Character</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.simple_form :let={f} for={@filter_form} phx-change="filter" class="mb-4">
+  <.input
+    field={f[:character_type]}
+    type="select"
+    label="Filter by Type"
+    options={[
+      {"All", ""},
+      {"Player Character", "player_character"},
+      {"NPC", "npc"},
+      {"Monster", "monster"}
+    ]}
+  />
+</.simple_form>
+
+<.table
+  id="characters"
+  rows={@streams.characters}
+  row_click={fn {_id, character} -> JS.navigate(~p"/characters/#{character}") end}
+>
+  <:col :let={{_id, character}} label="Name"><%= character.name %></:col>
+  <:col :let={{_id, character}} label="Type"><%= character.character_type %></:col>
+  <:col :let={{_id, character}} label="Occupation"><%= character.occupation %></:col>
+  <:col :let={{_id, character}} label="STR"><%= character.str %></:col>
+  <:col :let={{_id, character}} label="DEX"><%= character.dex %></:col>
+  <:col :let={{_id, character}} label="POW"><%= character.pow %></:col>
+  <:col :let={{_id, character}} label="CON"><%= character.con %></:col>
+  <:col :let={{_id, character}} label="APP"><%= character.app %></:col>
+  <:col :let={{_id, character}} label="EDU"><%= character.edu %></:col>
+  <:col :let={{_id, character}} label="INT"><%= character.int %></:col>
+  <:col :let={{_id, character}} label="SIZ"><%= character.siz %></:col>
+  <:col :let={{_id, character}} label="HP"><%= character.hp %></:col>
+  <:col :let={{_id, character}} label="MP"><%= character.mp %></:col>
+  <:col :let={{_id, character}} label="SAN"><%= character.san %></:col>
+  <:action :let={{_id, character}}>
+    <div class="sr-only">
+      View <%= character.name %>
+    </div>
+    <.link navigate={~p"/characters/#{character}"}>View</.link>
+  </:action>
+  <:action :let={{_id, character}}>
+    <div class="sr-only">
+      Edit <%= character.name %>
+    </div>
+    <.link patch={~p"/characters/#{character}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{_id, character}}>
+    <div class="sr-only">
+      Delete <%= character.name %>
+    </div>
+    <.link
+      phx-click={JS.push("delete", value: %{id: character.id}) |> hide("##{character.id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="character-modal" show on_cancel={JS.patch(~p"/characters")}>
+  <.live_component
+    module={CocArchivistWeb.CharacterLive.FormComponent}
+    id={@character.id || :new}
+    title={@page_title}
+    action={@live_action}
+    character={@character}
+    patch={~p"/characters"}
+  />
+</.modal> 

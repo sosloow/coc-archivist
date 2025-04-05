@@ -1,0 +1,56 @@
+<.header>
+  Character {@character.name}
+  <:subtitle>This is a character record.</:subtitle>
+  <:actions>
+    <.link patch={~p"/characters/#{@character}/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit character</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Name">{@character.name}</:item>
+  <:item title="Type">{@character.character_type}</:item>
+  <:item title="Occupation">{@character.occupation}</:item>
+  <:item title="Age">{@character.age}</:item>
+  <:item title="Sex">{@character.sex}</:item>
+  <:item title="Residence">{@character.residence}</:item>
+  <:item title="Birthplace">{@character.birthplace}</:item>
+</.list>
+
+<.header>Characteristics</.header>
+<.characteristics_grid character={@character} />
+
+<.header>Derived Attributes</.header>
+<.list>
+  <:item title="HP">{@character.hp}</:item>
+  <:item title="MP">{@character.mp}</:item>
+  <:item title="SAN">{@character.san}</:item>
+  <:item title="DB">{@character.db}</:item>
+</.list>
+
+<.header>Background</.header>
+<.list>
+  <:item title="Background">{@character.background}</:item>
+  <:item title="Personal Description">{@character.personal_description}</:item>
+  <:item title="Ideology & Beliefs">{@character.ideology_beliefs}</:item>
+  <:item title="Significant People">{@character.significant_people}</:item>
+  <:item title="Meaningful Locations">{@character.meaningful_locations}</:item>
+  <:item title="Treasured Possessions">{@character.treasured_possessions}</:item>
+  <:item title="Traits">{@character.traits}</:item>
+</.list>
+
+<.header>Sanity</.header>
+<.list>
+  <:item title="Current Sanity">{@character.current_sanity}</:item>
+  <:item title="Sanity Loss">{@character.sanity_loss}</:item>
+  <:item title="Phobias">{@character.phobias}</:item>
+  <:item title="Manias">{@character.manias}</:item>
+</.list>
+
+<.header>Notes</.header>
+<.list>
+  <:item title="Notes">{@character.notes}</:item>
+</.list>
+
+<.back navigate={~p"/characters"}>Back to characters</.back>

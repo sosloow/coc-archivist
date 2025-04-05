@@ -1,0 +1,22 @@
+<div class="fixed inset-y-0 left-0 z-50 w-64 bg-gray-800 border-r border-gray-700">
+  <div class="flex h-16 items-center justify-center border-b border-gray-700">
+    <a href="/" class="flex items-center gap-2">
+      <img src={~p"/images/logo.svg"} width="32" />
+      <span class="text-xl font-semibold text-emerald-400">CoC Archivist</span>
+    </a>
+  </div>
+  <nav class="flex flex-col gap-1 p-4">
+    <.link
+      navigate={~p"/scenarios"}
+      class="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-emerald-400 transition-colors duration-200"
+    >
+      <.icon name="hero-document-text-solid" class="h-5 w-5" /> Scenarios
+    </.link>
+    <.link
+      navigate={~p"/characters"}
+      class="flex items-center gap-3 rounded-lg px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-emerald-400 transition-colors duration-200"
+    >
+      <.icon name="hero-user-group-solid" class="h-5 w-5" /> Characters
+    </.link>
+  </nav>
+</div>

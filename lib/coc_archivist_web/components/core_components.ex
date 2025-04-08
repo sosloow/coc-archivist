@@ -562,7 +562,7 @@ defmodule CocArchivistWeb.CoreComponents do
 
   def back(assigns) do
     ~H"""
-    <div class="mt-16">
+    <div class="">
       <.link
         navigate={@navigate}
         class="text-sm font-semibold leading-6 text-emerald-400 hover:text-emerald-300"
@@ -677,4 +677,59 @@ defmodule CocArchivistWeb.CoreComponents do
   def translate_errors(errors, field) when is_list(errors) do
     for {^field, {msg, opts}} <- errors, do: translate_error({msg, opts})
   end
+
+  def image_uploader(assigns) do
+    ~H"""
+    <div class="mt-4">
+      <label class="block text-sm font-medium text-gray-400 mb-2">{@label}</label>
+      <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-lg">
+        <div class="space-y-1 text-center">
+          <svg
+            class="mx-auto h-12 w-12 text-gray-400"
+            stroke="currentColor"
+            fill="none"
+            viewBox="0 0 48 48"
+            aria-hidden="true"
+          >
+            <path
+              d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <div class="flex text-sm text-gray-400">
+            <label class="relative cursor-pointer rounded-md font-medium text-emerald-400 hover:text-emerald-300 focus-within:outline-none">
+              <span>Upload a file</span>
+              <.live_file_input upload={@uploads.portrait} class="hidden" />
+            </label>
+            <p class="pl-1">or drag and drop</p>
+          </div>
+          <p class="text-xs text-gray-400">PNG, JPG, JPEG up to 10MB</p>
+        </div>
+      </div>
+      <div :for={entry <- @uploads.portrait.entries} class="mt-4">
+        <div class="flex items-center">
+          <.live_img_preview entry={entry} class="h-20 w-20 object-cover rounded-lg" />
+          <div class="ml-4">
+            <p class="text-sm text-gray-400">{entry.client_name}</p>
+            <p class="text-xs text-gray-500">{entry.client_size} bytes</p>
+          </div>
+        </div>
+        <div class="mt-2">
+          <div class="w-full bg-gray-700 rounded-full h-2.5">
+            <div class="bg-emerald-600 h-2.5 rounded-full" style={"width: #{entry.progress}%"}></div>
+          </div>
+        </div>
+      </div>
+      <div :for={err <- upload_errors(@uploads.portrait)} class="mt-2 text-sm text-red-400">
+        {error_to_string(err)}
+      </div>
+    </div>
+    """
+  end
+
+  defp error_to_string(:too_large), do: "Too large"
+  defp error_to_string(:too_many_files), do: "You have selected too many files"
+  defp error_to_string(:not_accepted), do: "You have selected an unacceptable file type"
 end

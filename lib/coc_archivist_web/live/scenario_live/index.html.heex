@@ -1,5 +1,6 @@
 <.header>
   Listing Scenarios
+  <:subtitle>Welcome to your scenario listing page.</:subtitle>
   <:actions>
     <.link patch={~p"/scenarios/new"}>
       <.button>New Scenario</.button>
@@ -7,32 +8,44 @@
   </:actions>
 </.header>
 
-<.table
-  id="scenarios"
-  rows={@streams.scenarios}
-  row_click={fn {_id, scenario} -> JS.navigate(~p"/scenarios/#{scenario}") end}
->
-  <:col :let={{_id, scenario}} label="Title">{scenario.title}</:col>
-  <:col :let={{_id, scenario}} label="Description">{scenario.description}</:col>
-  <:col :let={{_id, scenario}} label="Location">{scenario.location}</:col>
-  <:col :let={{_id, scenario}} label="Date">{scenario.date}</:col>
-  <:action :let={{_id, scenario}}>
-    <div class="sr-only">
-      <.link navigate={~p"/scenarios/#{scenario}"}>Show</.link>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+  <.link
+    :for={{_id, scenario} <- @streams.scenarios}
+    patch={~p"/scenarios/#{scenario}"}
+    class="block bg-gray-800 rounded-lg overflow-hidden hover:bg-gray-700 transition-colors duration-200"
+  >
+    <div class="aspect-w-16 aspect-h-9">
+      <img
+        :if={scenario.cover}
+        src={CocArchivist.Uploaders.ImageUploader.url({scenario.cover, scenario}, :original)}
+        class="object-cover w-full h-full"
+        alt={scenario.title}
+      />
+      <div
+        :if={!scenario.cover}
+        class="bg-gray-700 w-full h-full flex items-center justify-center"
+      >
+        <span class="text-gray-400">No cover image</span>
+      </div>
     </div>
-    <.link patch={~p"/scenarios/#{scenario}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={{id, scenario}}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: scenario.id}) |> hide("##{id}")}
-      data-confirm="Are you sure?"
-    >
-      Delete
-    </.link>
-  </:action>
-</.table>
+    <div class="p-4">
+      <h3 class="text-lg font-semibold text-gray-100 mb-1">{scenario.title}</h3>
+      <p class="text-sm text-gray-400 line-clamp-2">{scenario.description}</p>
+      <div class="mt-2 flex items-center gap-4 text-sm text-gray-400">
+        <span>{scenario.location}</span>
+        <span>•</span>
+        <span>{scenario.date}</span>
+      </div>
+    </div>
+  </.link>
+</div>
 
-<.modal :if={@live_action in [:new, :edit]} id="scenario-modal" show on_cancel={JS.patch(~p"/scenarios")}>
+<.modal
+  :if={@live_action in [:new, :edit]}
+  id="scenario-modal"
+  show
+  on_cancel={JS.patch(~p"/scenarios")}
+>
   <.live_component
     module={CocArchivistWeb.ScenarioLive.FormComponent}
     id={@scenario.id || :new}

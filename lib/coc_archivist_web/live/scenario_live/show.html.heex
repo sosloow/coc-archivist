@@ -1,3 +1,4 @@
+<.back navigate={~p"/scenarios"}>Back to scenarios</.back>
 <.header>
   {@scenario.title}
   <:subtitle>{@scenario.description}</:subtitle>
@@ -29,6 +30,10 @@
       </div>
 
       <div class="space-y-6">
+        <div class="prose prose-invert max-w-none">
+          {@scenario.description}
+        </div>
+
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-semibold text-gray-400 mb-1">Location</label>
@@ -41,10 +46,26 @@
         </div>
       </div>
     </div>
+
+    <div class="mt-12">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold text-gray-100">NPCs</h2>
+        <.link navigate={~p"/characters/new?scenario_id=#{@scenario.id}"}>
+          <.button>Add NPC</.button>
+        </.link>
+      </div>
+
+      <.table
+        id="npcs"
+        rows={@streams.characters}
+        row_click={fn {_id, character} -> JS.navigate(~p"/characters/#{character}") end}
+      >
+        <:col :let={{_id, character}} label="Name">{character.name}</:col>
+        <:col :let={{_id, character}} label="Occupation">{character.occupation}</:col>
+      </.table>
+    </div>
   </div>
 </div>
-
-<.back navigate={~p"/scenarios"}>Back to scenarios</.back>
 
 <.modal
   :if={@live_action == :edit}

@@ -1,6 +1,8 @@
 defmodule CocArchivist.Characters.Character do
   use Ecto.Schema
   import Ecto.Changeset
+  use Waffle.Ecto.Schema
+  import CocArchivist.Dice
 
   schema "characters" do
     # Basic Information
@@ -21,13 +23,15 @@ defmodule CocArchivist.Characters.Character do
     field :edu, :integer
     field :int, :integer
     field :siz, :integer
+    field :lck, :integer
+    field :mov, :integer
 
     # Derived Attributes
     field :hp, :integer
     field :mp, :integer
     field :san, :integer
     field :db, :string
-
+    field :build, :integer
     # Skills (stored as JSON)
     field :skills, :map
 
@@ -41,7 +45,7 @@ defmodule CocArchivist.Characters.Character do
     field :traits, :string
 
     # Equipment
-    field :equipment, :map
+    field :equipment, :string
 
     # Sanity
     field :current_sanity, :integer
@@ -51,7 +55,10 @@ defmodule CocArchivist.Characters.Character do
 
     # Additional Fields
     field :notes, :string
-    field :portrait_url, :string
+    field :portrait, CocArchivist.Uploaders.ImageUploader.Type
+
+    # Associations
+    belongs_to :scenario, CocArchivist.Scenarios.Scenario
 
     timestamps(type: :utc_datetime)
   end
@@ -75,6 +82,7 @@ defmodule CocArchivist.Characters.Character do
       :edu,
       :int,
       :siz,
+      :lck,
       :hp,
       :mp,
       :san,
@@ -93,24 +101,15 @@ defmodule CocArchivist.Characters.Character do
       :phobias,
       :manias,
       :notes,
-      :portrait_url
+      :scenario_id
     ])
+    |> cast_attachments(attrs, [:portrait])
     |> validate_required([
       :name,
       :character_type,
-      :occupation,
-      :age,
-      :sex,
-      :str,
-      :dex,
-      :pow,
-      :con,
-      :app,
-      :edu,
-      :int,
-      :siz
+      :occupation
     ])
-    |> validate_number(:age, greater_than: 0, less_than: 100)
+    |> validate_number(:age, greater_than: 15, less_than: 95)
     |> validate_number(:str, greater_than_or_equal_to: 0, less_than_or_equal_to: 100)
     |> validate_number(:dex, greater_than_or_equal_to: 0, less_than_or_equal_to: 100)
     |> validate_number(:pow, greater_than_or_equal_to: 0, less_than_or_equal_to: 100)
@@ -119,29 +118,44 @@ defmodule CocArchivist.Characters.Character do
     |> validate_number(:edu, greater_than_or_equal_to: 0, less_than_or_equal_to: 100)
     |> validate_number(:int, greater_than_or_equal_to: 0, less_than_or_equal_to: 100)
     |> validate_number(:siz, greater_than_or_equal_to: 0, less_than_or_equal_to: 100)
+    |> validate_number(:lck, greater_than_or_equal_to: 0, less_than_or_equal_to: 100)
     |> calculate_derived_attributes()
   end
 
   defp calculate_derived_attributes(changeset) do
-    if get_change(changeset, :siz) && get_change(changeset, :con) do
-      siz = get_field(changeset, :siz)
-      con = get_field(changeset, :con)
-      hp = div(siz + con, 10)
-      mp = get_field(changeset, :pow)
-      san = get_field(changeset, :pow)
+    siz = get_field(changeset, :siz)
+    con = get_field(changeset, :con)
+    str = get_field(changeset, :str)
+    dex = get_field(changeset, :dex)
+    age = get_field(changeset, :age)
 
-      changeset
-      |> put_change(:hp, hp)
-      |> put_change(:mp, mp)
-      |> put_change(:san, san)
-      |> put_change(:current_sanity, san)
-      |> calculate_damage_bonus(siz, get_field(changeset, :str))
-    else
-      changeset
-    end
+    hp = div(siz + con, 10)
+    mp = div(get_field(changeset, :pow), 10)
+    san = get_field(changeset, :pow)
+
+    changeset
+    |> put_change(:hp, hp)
+    |> put_change(:mp, mp)
+    |> put_change(:san, san)
+    |> put_change(:current_sanity, san)
+    |> calculate_damage_bonus_and_build(siz, str)
+    |> calculate_mov(siz, str, dex, age)
   end
 
-  defp calculate_damage_bonus(changeset, siz, str) do
+  defp calculate_mov(changeset, siz, str, dex, age) do
+    base_mov = 7
+    slow_age = 30
+
+    mov =
+      base_mov +
+        if(dex > siz, do: 1, else: 0) +
+        if(str > siz, do: 1, else: 0) -
+        max(div(age - slow_age, 10), 0)
+
+    put_change(changeset, :mov, max(mov, 0))
+  end
+
+  defp calculate_damage_bonus_and_build(changeset, siz, str) do
     combined = siz + str
 
     damage_bonus =
@@ -154,6 +168,33 @@ defmodule CocArchivist.Characters.Character do
         true -> "+2D6"
       end
 
+    build =
+      cond do
+        combined < 65 -> -2
+        combined < 85 -> -1
+        combined < 125 -> 0
+        combined < 145 -> 1
+        true -> 2
+      end
+
     put_change(changeset, :db, damage_bonus)
+    |> put_change(:build, build)
+  end
+
+  @doc """
+  Generates random characteristics for a character and returns an updated changeset.
+  """
+  def random_characteristics() do
+    %{
+      str: roll_dice(3, 6) * 5,
+      dex: roll_dice(3, 6) * 5,
+      pow: roll_dice(3, 6) * 5,
+      con: roll_dice(3, 6) * 5,
+      app: roll_dice(3, 6) * 5,
+      edu: roll_dice(2, 6) * 5 + 30,
+      int: roll_dice(2, 6) * 5 + 30,
+      siz: roll_dice(2, 6) * 5 + 30,
+      lck: roll_dice(3, 6) * 5
+    }
   end
 end

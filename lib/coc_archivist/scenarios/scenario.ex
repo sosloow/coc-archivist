@@ -10,6 +10,9 @@ defmodule CocArchivist.Scenarios.Scenario do
     field :description, :string
     field :cover, CocArchivist.Uploaders.ImageUploader.Type
 
+    # Associations
+    has_many :characters, CocArchivist.Characters.Character
+
     timestamps()
   end
 

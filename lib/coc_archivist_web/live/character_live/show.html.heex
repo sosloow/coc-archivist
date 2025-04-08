@@ -1,33 +1,132 @@
+<.back navigate={~p"/characters"}>Back to characters</.back>
 <.header>
-  Character {@character.name}
-  <:subtitle>This is a character record.</:subtitle>
+  <span class="text-emerald-400">{format_character_type(@character.character_type)}</span> {@character.name}
+  <:subtitle>{@character.occupation}</:subtitle>
   <:actions>
-    <.link patch={~p"/characters/#{@character}/edit"} phx-click={JS.push_focus()}>
-      <.button>Edit character</.button>
+    <.link patch={~p"/characters/#{@character}/edit"}>
+      <.button class="bg-emerald-600 hover:bg-emerald-700">
+        <.icon name="hero-pencil-square" class="w-5 h-5" />
+      </.button>
+    </.link>
+    <.link
+      phx-click={JS.push("delete", value: %{id: @character.id}) |> hide("##{@character.id}")}
+      data-confirm="Are you sure you want to delete this character?"
+    >
+      <.button class="bg-red-600 hover:bg-red-700">
+        <.icon name="hero-trash" class="w-5 h-5" />
+      </.button>
     </.link>
   </:actions>
 </.header>
 
-<.list>
-  <:item title="Name">{@character.name}</:item>
-  <:item title="Type">{@character.character_type}</:item>
-  <:item title="Occupation">{@character.occupation}</:item>
-  <:item title="Age">{@character.age}</:item>
-  <:item title="Sex">{@character.sex}</:item>
-  <:item title="Residence">{@character.residence}</:item>
-  <:item title="Birthplace">{@character.birthplace}</:item>
-</.list>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
+  <div class="md:col-span-1">
+    <div class="aspect-square bg-gray-800 rounded-lg overflow-hidden">
+      <%= if @character.portrait do %>
+        <img
+          src={
+            CocArchivist.Uploaders.ImageUploader.url({@character.portrait, @character}, :original)
+          }
+          alt={@character.name}
+          class="w-full h-full object-cover"
+        />
+      <% else %>
+        <div class="w-full h-full flex items-center justify-center">
+          <span class="text-gray-500">No portrait</span>
+        </div>
+      <% end %>
+    </div>
+  </div>
 
-<.header>Characteristics</.header>
-<.characteristics_grid character={@character} />
+  <div class="md:col-span-2 mb-6">
+    <div class="">
+      <div class="grid grid-cols-1 gap-x-4 gap-y-2 sm:grid-cols-2">
+        <div>
+          <div class="field-label">Occupation</div>
+          <.live_component
+            module={CocArchivistWeb.CharacterLive.EditableTextComponent}
+            id="occupation"
+            field="occupation"
+            value={@character.occupation}
+          />
+        </div>
+        <div>
+          <div class="field-label">Age</div>
+          <.live_component
+            module={CocArchivistWeb.CharacterLive.EditableTextComponent}
+            id="age"
+            field="age"
+            value={@character.age}
+          />
+        </div>
+        <div>
+          <div class="field-label">Sex</div>
+          <.live_component
+            module={CocArchivistWeb.CharacterLive.EditableTextComponent}
+            id="sex"
+            field="sex"
+            value={@character.sex}
+          />
+        </div>
+        <div>
+          <div class="field-label">Residence</div>
+          <.live_component
+            module={CocArchivistWeb.CharacterLive.EditableTextComponent}
+            id="residence"
+            field="residence"
+            value={@character.residence}
+          />
+        </div>
+        <div>
+          <div class="field-label">Birthplace</div>
+          <.live_component
+            module={CocArchivistWeb.CharacterLive.EditableTextComponent}
+            id="birthplace"
+            field="birthplace"
+            value={@character.birthplace}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-<.header>Derived Attributes</.header>
-<.list>
-  <:item title="HP">{@character.hp}</:item>
-  <:item title="MP">{@character.mp}</:item>
-  <:item title="SAN">{@character.san}</:item>
-  <:item title="DB">{@character.db}</:item>
-</.list>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <div>
+    <.header>
+      Characteristics
+      <:actions>
+        <.button phx-click="randomize" class="bg-transparent hover:bg-transparent p-0">
+          <.icon name="hero-arrow-path" class="w-5 h-5 text-gray-400 hover:text-emerald-400" />
+        </.button>
+      </:actions>
+    </.header>
+    <.characteristics_grid character={@character} />
+  </div>
+
+  <div>
+    <.header>Derived Attributes</.header>
+    <div class="grid grid-cols-3 gap-2 max-w-md mx-auto mt-1">
+      <%= for {label, value} <- [
+            {"HP", @character.hp},
+            {"MP", @character.mp},
+            {"SAN", @character.san},
+            {"DB", @character.db},
+            {"Build", @character.build},
+            {"MOV", @character.mov}
+          ] do %>
+        <div class="bg-gray-800 shadow rounded p-2">
+          <div class="text-sm font-semibold text-gray-300 text-center mb-1">{label}</div>
+          <div class="grid grid-cols-1 gap-1">
+            <div class="text-xl font-bold text-emerald-400 text-center row-span-2 flex items-center justify-center h-[52px]">
+              {value}
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
 
 <.header>Background</.header>
 <.list>
@@ -52,5 +151,3 @@
 <.list>
   <:item title="Notes">{@character.notes}</:item>
 </.list>
-
-<.back navigate={~p"/characters"}>Back to characters</.back>

@@ -17,17 +17,18 @@ defmodule CocArchivistWeb.CharacterLive.FormComponent do
         id="character-form"
         phx-target={@myself}
         phx-change="validate"
-        phx-submit="save"
+        phx-submit={@rest[:phx_submit]}
       >
+        <.input field={@form[:scenario_id]} type="text" class="hidden" />
         <.input field={@form[:name]} type="text" label="Name" />
         <.input
           field={@form[:character_type]}
           type="select"
-          label="Character Type"
+          label="Type"
           options={[
-            {"Player Character", "player_character"},
-            {"NPC", "npc"},
-            {"Monster", "monster"}
+            {"Player Character", :player_character},
+            {"NPC", :npc},
+            {"Monster", :monster}
           ]}
         />
         <.input field={@form[:occupation]} type="text" label="Occupation" />
@@ -36,7 +37,7 @@ defmodule CocArchivistWeb.CharacterLive.FormComponent do
         <.input field={@form[:residence]} type="text" label="Residence" />
         <.input field={@form[:birthplace]} type="text" label="Birthplace" />
 
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <.input field={@form[:str]} type="number" label="STR" />
           <.input field={@form[:dex]} type="number" label="DEX" />
           <.input field={@form[:pow]} type="number" label="POW" />
@@ -47,13 +48,14 @@ defmodule CocArchivistWeb.CharacterLive.FormComponent do
           <.input field={@form[:siz]} type="number" label="SIZ" />
         </div>
 
-        <div class="grid grid-cols-2 gap-4">
-          <.input field={@form[:hp]} type="number" label="HP" disabled />
-          <.input field={@form[:mp]} type="number" label="MP" disabled />
-          <.input field={@form[:san]} type="number" label="SAN" disabled />
-          <.input field={@form[:db]} type="text" label="DB" disabled />
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <.input field={@form[:hp]} type="number" label="HP" />
+          <.input field={@form[:mp]} type="number" label="MP" />
+          <.input field={@form[:san]} type="number" label="SAN" />
+          <.input field={@form[:db]} type="text" label="DB" />
         </div>
 
+        <.input field={@form[:skills]} type="textarea" label="Skills" />
         <.input field={@form[:background]} type="textarea" label="Background" />
         <.input field={@form[:personal_description]} type="textarea" label="Personal Description" />
         <.input field={@form[:ideology_beliefs]} type="textarea" label="Ideology & Beliefs" />
@@ -61,14 +63,14 @@ defmodule CocArchivistWeb.CharacterLive.FormComponent do
         <.input field={@form[:meaningful_locations]} type="textarea" label="Meaningful Locations" />
         <.input field={@form[:treasured_possessions]} type="textarea" label="Treasured Possessions" />
         <.input field={@form[:traits]} type="textarea" label="Traits" />
-
+        <.input field={@form[:equipment]} type="textarea" label="Equipment" />
         <.input field={@form[:current_sanity]} type="number" label="Current Sanity" />
         <.input field={@form[:sanity_loss]} type="number" label="Sanity Loss" />
         <.input field={@form[:phobias]} type="textarea" label="Phobias" />
         <.input field={@form[:manias]} type="textarea" label="Manias" />
-
         <.input field={@form[:notes]} type="textarea" label="Notes" />
-        <.input field={@form[:portrait_url]} type="text" label="Portrait URL" />
+
+        <.image_uploader uploads={@uploads} label="Portrait" id={@myself} />
 
         <:actions>
           <.button phx-disable-with="Saving...">Save Character</.button>
@@ -85,7 +87,11 @@ defmodule CocArchivistWeb.CharacterLive.FormComponent do
     {:ok,
      socket
      |> assign(assigns)
-     |> assign_form(changeset)}
+     |> assign_form(changeset)
+     |> allow_upload(:portrait,
+       accept: ~w(.png .jpg .jpeg),
+       max_file_size: 10_000_000
+     )}
   end
 
   @impl true
@@ -98,8 +104,24 @@ defmodule CocArchivistWeb.CharacterLive.FormComponent do
     {:noreply, assign_form(socket, changeset)}
   end
 
+  @impl true
   def handle_event("save", %{"character" => character_params}, socket) do
-    save_character(socket, socket.assigns.action, character_params)
+    [character_with_portrait] =
+      consume_uploaded_entries(socket, :portrait, fn meta, entry ->
+        image_plug_upload =
+          %Plug.Upload{
+            content_type: entry.client_type,
+            filename: entry.client_name,
+            path: meta.path
+          }
+
+        updated_params =
+          Map.put(character_params, "portrait", image_plug_upload)
+
+        {:postpone, updated_params}
+      end)
+
+    save_character(socket, socket.assigns.action, character_with_portrait)
   end
 
   defp save_character(socket, :edit, character_params) do

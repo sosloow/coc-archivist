@@ -14,21 +14,43 @@ defmodule CocArchivistWeb.CharacterLive.Index do
   end
 
   defp apply_action(socket, :edit, %{"id" => id}) do
+    character = Characters.get_character!(id)
+
+    return_to =
+      if character.scenario_id, do: ~p"/scenarios/#{character.scenario_id}", else: ~p"/characters"
+
     socket
     |> assign(:page_title, "Edit Character")
-    |> assign(:character, Characters.get_character!(id))
+    |> assign(:character, character)
+    |> assign(:return_to, return_to)
+    |> assign(:filter_form, to_form(%{"character_type" => ""}))
   end
 
-  defp apply_action(socket, :new, _params) do
+  defp apply_action(socket, :new, params) do
+    character = %Character{
+      scenario_id: params["scenario_id"],
+      character_type: "npc"
+    }
+
+    return_to =
+      if params["scenario_id"] do
+        ~p"/scenarios/#{params["scenario_id"]}"
+      else
+        ~p"/characters"
+      end
+
     socket
     |> assign(:page_title, "New Character")
-    |> assign(:character, %Character{})
+    |> assign(:character, character)
+    |> assign(:return_to, return_to)
+    |> assign(:filter_form, to_form(%{"character_type" => ""}))
   end
 
   defp apply_action(socket, :index, _params) do
     socket
     |> assign(:page_title, "Listing Characters")
     |> assign(:character, nil)
+    |> assign(:return_to, ~p"/characters")
     |> assign(:filter_form, to_form(%{"character_type" => ""}))
   end
 

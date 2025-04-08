@@ -36,7 +36,7 @@ defmodule CocArchivistWeb.ScenarioLive.FormComponent do
               <span class="text-gray-400">No cover image</span>
             </div>
           </div>
-          <label class="btn bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded inline-flex items-center gap-2 cursor-pointer">
+          <label class="btn bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded inline-flex items-center gap-2 cursor-pointer">
             Change Cover <.live_file_input upload={@uploads.cover} class="hidden" />
           </label>
         </div>

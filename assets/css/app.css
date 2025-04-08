@@ -3,3 +3,11 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+
+.field-label {
+    @apply text-sm font-medium text-gray-400;
+}
+
+.field-value {
+    @apply text-gray-100;
+}

@@ -17,7 +17,25 @@ defmodule CocArchivist.Characters do
 
   """
   def list_characters do
-    Repo.all(Character)
+    Character
+    |> preload(:scenario)
+    |> Repo.all()
+  end
+
+  @doc """
+  Returns the list of characters for a specific scenario.
+
+  ## Examples
+
+      iex> list_characters_by_scenario(scenario_id)
+      [%Character{}, ...]
+
+  """
+  def list_characters_by_scenario(scenario_id) do
+    Character
+    |> where([c], c.scenario_id == ^scenario_id)
+    |> preload(:scenario)
+    |> Repo.all()
   end
 
   @doc """
@@ -32,6 +50,7 @@ defmodule CocArchivist.Characters do
   def list_characters_by_type(type) when type in ["player_character", "npc", "monster"] do
     Character
     |> where([c], c.character_type == ^type)
+    |> preload(:scenario)
     |> Repo.all()
   end
 
@@ -49,7 +68,11 @@ defmodule CocArchivist.Characters do
       ** (Ecto.NoResultsError)
 
   """
-  def get_character!(id), do: Repo.get!(Character, id)
+  def get_character!(id) do
+    Character
+    |> preload(:scenario)
+    |> Repo.get!(id)
+  end
 
   @doc """
   Creates a character.
@@ -114,5 +137,14 @@ defmodule CocArchivist.Characters do
   """
   def change_character(%Character{} = character, attrs \\ %{}) do
     Character.changeset(character, attrs)
+  end
+
+  @doc """
+  Randomizes a character's characteristics and saves them to the database.
+  """
+  def randomize_characteristics(character) do
+    random_characteristics = Character.random_characteristics()
+
+    update_character(character, random_characteristics)
   end
 end
